@@ -1,2 +1,2 @@
-# akka-typed-lifegame
+# akka-typed-gameoflife
 Akka Typedを使用したライフゲーム
