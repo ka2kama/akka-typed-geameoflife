@@ -1,4 +1,4 @@
-name := "akka-typed-game-of-life"
+name := "akka-typed-gameoflife"
 
 version := "0.1"
 
