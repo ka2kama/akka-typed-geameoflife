@@ -3,7 +3,7 @@ package com.ka2kama.life
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.collection.immutable.ArraySeq
 import scala.util.Random
 
@@ -42,15 +42,15 @@ private final class BoardFactory(
       val (newBoard, hasChanged) = advance(board)
       if (hasChanged) {
         replyTo ! CreatedBoard(newBoard)
-      } else {
+      }
+      else {
         replyTo ! NoChanged
       }
       receive(newBoard)
     }
 
-  def initBoard(): Board = {
+  private def initBoard(): Board = {
     val table = Array.ofDim[CellState](height + 2, width + 2)
-    val rnd   = new Random
     for {
       row <- 0 until height + 2
       col <- 0 until width + 2
@@ -59,8 +59,9 @@ private final class BoardFactory(
         // 番兵
         if (col == 0 || row == 0 || col == width + 1 || row == height + 1) {
           CellState.Dead
-        } else {
-          if (rnd.nextBoolean()) CellState.Alive else CellState.Dead
+        }
+        else {
+          if (Random.nextBoolean()) CellState.Alive else CellState.Dead
         }
       table(row)(col) = state
     }
@@ -68,11 +69,11 @@ private final class BoardFactory(
     Board(
       ArraySeq.unsafeWrapArray(table.map(ArraySeq.unsafeWrapArray)),
       0,
-      LocalDateTime.now(),
+      Instant.now(),
     )
   }
 
-  def advance(board: Board): (Board, Boolean) = {
+  private def advance(board: Board): (Board, Boolean) = {
     val table      = board.table
     val newTable   = Array.ofDim[CellState](height + 2, width + 2)
     var hasChanged = false
@@ -85,9 +86,10 @@ private final class BoardFactory(
         // 番兵
         if (col == 0 || row == 0 || col == width + 1 || row == height + 1) {
           CellState.Dead
-        } else {
+        }
+        else {
           // 8方向のうち、生きているセルをカウント
-          val count = Seq(
+          val count = Iterator(
             // 左上、真上、右上
             table(row - 1)(col - 1),
             table(row - 1)(col),
@@ -101,11 +103,10 @@ private final class BoardFactory(
             table(row + 1)(col + 1),
           ).count(_ == CellState.Alive)
 
-          currentState match {
-            case CellState.Dead =>
-              if (count == 3) CellState.Alive else CellState.Dead
-            case CellState.Alive =>
-              if (count == 2 || count == 3) CellState.Alive else CellState.Dead
+          count match {
+            case 3                                    => CellState.Alive
+            case 2 if currentState == CellState.Alive => CellState.Alive
+            case _                                    => CellState.Dead
           }
         }
 
@@ -119,7 +120,7 @@ private final class BoardFactory(
     val newBoard = Board(
       ArraySeq.unsafeWrapArray(newTable.map(ArraySeq.unsafeWrapArray)),
       board.generation + 1,
-      LocalDateTime.now(),
+      Instant.now(),
     )
 
     (newBoard, hasChanged)

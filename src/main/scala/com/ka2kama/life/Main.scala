@@ -6,7 +6,6 @@ import com.ka2kama.life.supports.ConfigOps.RichConfig
 import com.ka2kama.life.writer.ConsoleWriter
 import com.typesafe.config.{Config, ConfigFactory}
 
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.DurationInt
 
 object Main {
@@ -52,16 +51,16 @@ private final class Guardian(context: ActorContext[_], config: Config) {
       height = height,
       width = width,
       interval = interval,
-      maxGeneration,
+      maxGeneration = maxGeneration,
     )
   }
 
   def createRecipientList(): ActorRef[Board] = {
-    val buf = ListBuffer.empty[ActorRef[Board]]
+    val buf = Vector.newBuilder[ActorRef[Board]]
 
     val consoleWriter = context.spawn(ConsoleWriter(), "console-writer")
     buf += consoleWriter
 
-    context.spawn(RecipientList(buf.toList), "recipient-list")
+    context.spawn(RecipientList(buf.result()), "recipient-list")
   }
 }

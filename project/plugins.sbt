@@ -1,3 +1,4 @@
-import sbt.addSbtPlugin
-
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.15.0")
+// https://github.com/scalameta/sbt-scalafmt
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
+// https://github.com/sbt/sbt-native-packager
+addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.9")
